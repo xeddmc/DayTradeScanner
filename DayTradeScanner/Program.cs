@@ -70,7 +70,7 @@ namespace DayTradeScanner
 					}
 
 					var ticker = allTickers.FirstOrDefault(e => e.Key == symbol).Value;
-					if (ticker.Volume.ConvertedVolume < 500000)
+					if (ticker.Volume.ConvertedVolume < volume)
 					{
                         Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} skipped");
 						continue;
