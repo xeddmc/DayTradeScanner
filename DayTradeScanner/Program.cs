@@ -33,17 +33,17 @@ namespace DayTradeScanner
 					   continue;
 				   }
 					symbols.Add(symbol);
-					Console.WriteLine($"Adding {symbol} to scan list");
+					Console.WriteLine($"Adding {symbol} with 24hr volume of $ {ticker.Volume.ConvertedVolume} to scan list");
 			   }
 
 			   var date = DateTime.Now;
 			   while (true)
 			   {
-					Console.WriteLine($"scanning {0} symbols...", symbols.Count);
+					Console.WriteLine($"scanning 5min charts for {symbols.Count} symbols...");
 				   date = DateTime.Now;
 				   foreach (var symbol in symbols)
 				   {
-					   var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.Date)).Reverse().ToList();
+						var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5*100))).Reverse().ToList();
 
 					   var bbands = new BollingerBands(candles);
 					   var stoch = new Stochastics(candles);
@@ -54,14 +54,14 @@ namespace DayTradeScanner
 						   {
 							   if (candles[0].ClosePrice < bbands.Lower)
 							   {
-								   Console.WriteLine($"{symbol} long signal");
+								   Console.WriteLine($"{symbol} long signal found");
 							   }
 						   }
 						   else if (stoch.K > 80 && stoch.D > 80)
 						   {
 							   if (candles[0].ClosePrice > bbands.Upper)
 							   {
-								   Console.WriteLine($"{symbol} short signal");
+								   Console.WriteLine($"{symbol} short signal found");
 							   }
 						   }
 					   }
