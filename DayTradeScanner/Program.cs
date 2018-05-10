@@ -32,18 +32,18 @@ namespace DayTradeScanner
 					   // skip coins with a 24hr trading volume < $1,000,000 dollar
 					   continue;
 				   }
-					symbols.Add(symbol);
-					Console.WriteLine($"Adding {symbol} with 24hr volume of $ {ticker.Volume.ConvertedVolume} to scan list");
+				   symbols.Add(symbol);
+				   Console.WriteLine($"Adding {symbol} with 24hr volume of $ {ticker.Volume.ConvertedVolume} to scan list");
 			   }
 
 			   var date = DateTime.Now;
 			   while (true)
 			   {
-					Console.WriteLine($"scanning 5min charts for {symbols.Count} symbols...");
+				   Console.WriteLine($"scanning 5min charts for {symbols.Count} symbols...");
 				   date = DateTime.Now;
 				   foreach (var symbol in symbols)
 				   {
-						var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5*100))).Reverse().ToList();
+					   var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 100))).Reverse().ToList();
 
 					   var bbands = new BollingerBands(candles);
 					   var stoch = new Stochastics(candles);
@@ -68,8 +68,12 @@ namespace DayTradeScanner
 				   }
 
 				   Console.WriteLine("waiting...");
-				   var ts = DateTime.Now - date;
-				   while (ts.TotalMinutes < 5) await Task.Delay(5000);
+				   while (true)
+				   {
+					   var ts = DateTime.Now - date;
+					   if (ts.TotalMinutes >= 1) break;
+					   await Task.Delay(5000);                  
+				   }
 			   }
 		   }).Wait();
 		}
