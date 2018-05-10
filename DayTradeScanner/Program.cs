@@ -10,8 +10,10 @@ namespace DayTradeScanner
 	{
 		static void Main(string[] args)
 		{
+			var bgColor = Console.BackgroundColor;
+			var fgColor = Console.ForegroundColor;
 			Console.WriteLine("Daytrader scanner 1.0 for Bitfinex");
-			Console.WriteLine("Scanning 5min charts for daytrading signals on USD coins with a volume > $500,000");
+			Console.WriteLine("Construct list of USD symbols with enough volume");
 			Task.Run(async () =>
 		   {
 			   var api = new ExchangeBitfinexAPI();
@@ -36,10 +38,11 @@ namespace DayTradeScanner
 				   Console.WriteLine($"Adding {symbol} with 24hr volume of $ {ticker.Volume.ConvertedVolume} to scan list");
 			   }
 
+			   Console.WriteLine($"List constructed.. Now starting scanning of 5 min charts for {symbols.Count} symbols...");
 			   var date = DateTime.Now;
 			   while (true)
 			   {
-				   Console.WriteLine($"scanning 5min charts for {symbols.Count} symbols...");
+				   Console.WriteLine($"scanning...");
 				   date = DateTime.Now;
 				   foreach (var symbol in symbols)
 				   {
@@ -54,14 +57,24 @@ namespace DayTradeScanner
 						   {
 							   if (candles[0].ClosePrice < bbands.Lower)
 							   {
+								   Console.Beep();
+								   Console.BackgroundColor = ConsoleColor.Red;
+								   Console.ForegroundColor = ConsoleColor.White;
 								   Console.WriteLine($"{symbol} long signal found");
+								   Console.BackgroundColor = bgColor;
+								   Console.ForegroundColor = fgColor;
 							   }
 						   }
 						   else if (stoch.K > 80 && stoch.D > 80)
 						   {
 							   if (candles[0].ClosePrice > bbands.Upper)
 							   {
+								   Console.Beep();
+								   Console.BackgroundColor = ConsoleColor.Red;
+								   Console.ForegroundColor = ConsoleColor.White;
 								   Console.WriteLine($"{symbol} short signal found");
+								   Console.BackgroundColor = bgColor;
+								   Console.ForegroundColor = fgColor;
 							   }
 						   }
 					   }
@@ -72,7 +85,7 @@ namespace DayTradeScanner
 				   {
 					   var ts = DateTime.Now - date;
 					   if (ts.TotalMinutes >= 1) break;
-					   await Task.Delay(5000);                  
+					   await Task.Delay(5000);
 				   }
 			   }
 		   }).Wait();
