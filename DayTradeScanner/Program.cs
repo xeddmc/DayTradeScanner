@@ -12,7 +12,10 @@ namespace DayTradeScanner
 	{
 		public static IConfigurationRoot Configuration;
 		static void Main(string[] args)
-		{
+		{         
+			//var tester = new BackTester();
+			//tester.Test();
+
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Path.Combine(AppContext.BaseDirectory))
 				.AddJsonFile("appsettings.json", optional: true);
@@ -87,37 +90,43 @@ namespace DayTradeScanner
 					date = DateTime.Now;
 					foreach (var symbol in symbols)
 					{
-						var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 100))).Reverse().ToList();
-
-						var bbands = new BollingerBands(candles);
-						var stoch = new Stochastics(candles);
-
-						if (bbands.Bandwidth >= minBBWPercentage)
+						try
 						{
-							if (stoch.K < 20 && stoch.D < 20)
+							var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 100))).Reverse().ToList();
+
+							var bbands = new BollingerBands(candles,0);
+							var stoch = new Stochastics(candles,0);
+
+							if (bbands.Bandwidth >= minBBWPercentage)
 							{
-								if (candles[0].ClosePrice < bbands.Lower)
+								if (stoch.K < 20 && stoch.D < 20)
 								{
-									Console.Beep();
-									Console.BackgroundColor = ConsoleColor.Red;
-									Console.ForegroundColor = ConsoleColor.White;
-									Console.WriteLine($"{symbol} long signal found");
-									Console.BackgroundColor = bgColor;
-									Console.ForegroundColor = fgColor;
+									if (candles[0].ClosePrice < bbands.Lower)
+									{
+										Console.Beep();
+										Console.BackgroundColor = ConsoleColor.Red;
+										Console.ForegroundColor = ConsoleColor.White;
+										Console.WriteLine($"{symbol} long signal found");
+										Console.BackgroundColor = bgColor;
+										Console.ForegroundColor = fgColor;
+									}
+								}
+								else if (stoch.K > 80 && stoch.D > 80)
+								{
+									if (candles[0].ClosePrice > bbands.Upper)
+									{
+										Console.Beep();
+										Console.BackgroundColor = ConsoleColor.Red;
+										Console.ForegroundColor = ConsoleColor.White;
+										Console.WriteLine($"{symbol} short signal found");
+										Console.BackgroundColor = bgColor;
+										Console.ForegroundColor = fgColor;
+									}
 								}
 							}
-							else if (stoch.K > 80 && stoch.D > 80)
-							{
-								if (candles[0].ClosePrice > bbands.Upper)
-								{
-									Console.Beep();
-									Console.BackgroundColor = ConsoleColor.Red;
-									Console.ForegroundColor = ConsoleColor.White;
-									Console.WriteLine($"{symbol} short signal found");
-									Console.BackgroundColor = bgColor;
-									Console.ForegroundColor = fgColor;
-								}
-							}
+						}
+						catch(Exception){
+							
 						}
 					}
 
