@@ -45,6 +45,9 @@ namespace DayTradeScanner
 				case "gdax":
 					api = new ExchangeGdaxAPI();
 					break;
+                case "hitbtc":
+                    api = new ExchangeHitbtcAPI();
+                    break;
 				default:
 					Console.WriteLine($"Unknown exchange:{Configuration["Exchange"]}");
 					return;

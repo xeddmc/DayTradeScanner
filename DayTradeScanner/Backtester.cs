@@ -67,6 +67,7 @@ namespace DayTradeScanner
 			Console.WriteLine("Start backtesting...");
 			var trades = new List<Trade>();
 			Trade trade = null;
+			decimal capital = 1000;
 			for (int i = allCandles.Count - 50; i > 0; i--)
 			{
 				var candle = allCandles[i];
@@ -78,8 +79,10 @@ namespace DayTradeScanner
 					trade.Process(candle, bbands, stoch);
 					if (trade.IsClosed)
 					{
+						capital += trade.ProfitDollars;
 						trades.Add(trade);
 						trade = null;
+
 					}
 				}
 				else
@@ -90,7 +93,7 @@ namespace DayTradeScanner
 						{
 							if (candle.ClosePrice < bbands.Lower)
 							{
-								trade = new Trade(symbol, candle.Timestamp, TradeType.Long, candle.ClosePrice);
+								trade = new Trade(symbol, candle.Timestamp, TradeType.Long, candle.ClosePrice, capital);
 							}
 						}
 					}
@@ -152,6 +155,8 @@ namespace DayTradeScanner
 
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");
+			Console.WriteLine($"Starting capital      : $ 1000" );
+			Console.WriteLine($"Ending capital        : $ {capital:0.00}");
 			Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
 			Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp.AddHours(2):dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp.AddHours(2):dd-MM-yyyy HH:mm}");
 			Console.WriteLine($"Trades                : {trades.Count} trades");
