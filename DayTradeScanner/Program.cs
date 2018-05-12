@@ -14,7 +14,7 @@ namespace DayTradeScanner
 		static void Main(string[] args)
 		{         
 			//var tester = new BackTester();
-			//tester.Test();
+			//tester.Test(new ExchangeBitfinexAPI(), "EOSUSD");
 
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Path.Combine(AppContext.BaseDirectory))

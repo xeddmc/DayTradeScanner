@@ -14,18 +14,23 @@ namespace DayTradeScanner
 		public TradeType TradeType { get; set; }
 		public decimal? ProfitPercentage { get; set; }
 		public bool IsClosed => _state == TradeState.Closed;
+		public int Rebuys { get; set; }
+
+		private decimal RebuyPrice1;
+		private DateTime RebuyDate2;
+		private DateTime RebuyDate1;
+		private decimal RebuyPrice2;
 
 		private TradeState _state = TradeState.Opened;
-		private decimal _rebuyPrice1;
-		private decimal _rebuyPrice2;
 
 
 		public Trade(string symbol, DateTime date, TradeType tradeType, decimal openPrice)
 		{
 			Symbol = symbol;
-			StartDate = date;
+			StartDate = date.AddHours(2);
 			OpenPrice = openPrice;
 			TradeType = tradeType;
+			Rebuys = 0;
 		}
 
 		public void Process(MarketCandle candle, BollingerBands bbands, Stochastics stoch)
@@ -36,38 +41,38 @@ namespace DayTradeScanner
 			var lastPrice = candle.HighPrice;
 			if (lastPrice > bbands.Upper)
 			{
-				CloseDate = candle.Timestamp;
+				CloseDate = candle.Timestamp.AddHours(2);;
 				ClosePrice = lastPrice;
 
 				// calculate average price
 				var averagePrice = OpenPrice;
-				if (_state == TradeState.Rebuy2)
+				if (_state == TradeState.Rebuy1)
 				{
-					averagePrice = OpenPrice + _rebuyPrice1 + _rebuyPrice2;
-					averagePrice = averagePrice / 7m;
-				}
-				else if (_state == TradeState.Rebuy1)
-				{
-					averagePrice = OpenPrice + _rebuyPrice1;
+					averagePrice = OpenPrice + 2 * RebuyPrice1;
 					averagePrice = averagePrice / 3m;
 				}
+				else if (_state == TradeState.Rebuy2)
+				{
+					averagePrice = OpenPrice + 2 * RebuyPrice1 + 4 * RebuyPrice2;
+					averagePrice = averagePrice / 7m;
+				}
 
-                // calculate profit
+				// calculate profit
+				var profit = (ClosePrice / averagePrice) * 100m;
 				if (ClosePrice >= averagePrice)
 				{
-					var profit = ClosePrice / averagePrice;
-					ProfitPercentage = 100m * profit;
+					ProfitPercentage = profit - 100m;
 				}
 				else
 				{
-					var profit = averagePrice / ClosePrice;
-					ProfitPercentage = -(100m * profit);
+					ProfitPercentage = -(100m - profit);
 				}
 				_state = TradeState.Closed;
 				return;
 			}
 
 			var closePrice = candle.ClosePrice;
+			var date = candle.Timestamp.AddHours(2);
 			switch (_state)
 			{
 				case TradeState.Opened:
@@ -77,7 +82,9 @@ namespace DayTradeScanner
 						{
 							if (closePrice < 0.9825m * OpenPrice)
 							{
-								_rebuyPrice1 = closePrice;
+								RebuyPrice1 = closePrice;
+								RebuyDate1 = date;
+								Rebuys = 1;
 								_state = TradeState.Rebuy1;
 							}
 						}
@@ -90,9 +97,11 @@ namespace DayTradeScanner
 					{
 						if (stoch.K < 20 && stoch.D < 20)
 						{
-							if (closePrice < 0.9825m * _rebuyPrice1)
+							if (closePrice < 0.9825m * RebuyPrice1)
 							{
-								_rebuyPrice2 = closePrice;
+								RebuyPrice2 = closePrice;
+								RebuyDate2 = date;
+								Rebuys = 2;
 								_state = TradeState.Rebuy2;
 							}
 						}
@@ -105,6 +114,23 @@ namespace DayTradeScanner
 
 				case TradeState.Closed:
 					// done...
+					break;
+			}
+		}
+
+		public void Dump()
+		{
+			Console.WriteLine($"{StartDate:dd-MM-yyyy HH:mm} - {CloseDate:dd-MM-yyyy HH:mm} open:{ClosePrice:0.000000} close: {OpenPrice:0.000000}  profit:{ProfitPercentage:0.00} %");
+			switch (Rebuys)
+			{
+				case 0:
+					break;
+				case 1:
+					Console.WriteLine($"  rebuy1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
+					break;
+				case 2:
+					Console.WriteLine($"  rebuy1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
+					Console.WriteLine($"  rebuy2: {RebuyDate2:dd-MM-yyyy HH:mm} {RebuyPrice2:0.000000}");
 					break;
 			}
 		}
