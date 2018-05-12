@@ -40,7 +40,7 @@ namespace DayTradeScanner
 		public Trade(string symbol, DateTime date, TradeType tradeType, decimal openPrice, decimal capital)
 		{
 			Symbol = symbol;
-			StartDate = date.AddHours(2);
+			StartDate = date;
 			OpenPrice = openPrice;
 			TradeType = tradeType;
 			Rebuys = 0;
@@ -61,7 +61,7 @@ namespace DayTradeScanner
 			var lastPrice = candle.HighPrice;
 			if (lastPrice > bbands.Upper)
 			{
-				CloseDate = candle.Timestamp.AddHours(2); ;
+				CloseDate = candle.Timestamp;
 				ClosePrice = lastPrice;
                 
 				_feesPayed += (FeesPercentage / 100m) * _totalInvestment; 
@@ -75,7 +75,7 @@ namespace DayTradeScanner
 			}
 
 			var closePrice = candle.ClosePrice;
-			var date = candle.Timestamp.AddHours(2);
+			var date = candle.Timestamp;
 			switch (_state)
 			{
 				case TradeState.Opened:
@@ -143,12 +143,12 @@ namespace DayTradeScanner
 					break;
 				
 				case 1:
-					Console.WriteLine($"  rebuy1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
+					Console.WriteLine($"  rebuy #1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
 					break;
 
 				case 2:
-					Console.WriteLine($"  rebuy1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
-					Console.WriteLine($"  rebuy2: {RebuyDate2:dd-MM-yyyy HH:mm} {RebuyPrice2:0.000000}");
+					Console.WriteLine($"  rebuy #1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
+					Console.WriteLine($"  rebuy #2: {RebuyDate2:dd-MM-yyyy HH:mm} {RebuyPrice2:0.000000}");
 					break;
 			}
 		}

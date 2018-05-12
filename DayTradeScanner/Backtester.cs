@@ -14,15 +14,14 @@ namespace DayTradeScanner
 		/// <summary>
 		/// Downloads 5min. candle sticks data for the symbol from 1/1/2018 until now
 		/// </summary>
-		/// <returns>list of 5m candle sticks since 1/1/2018</returns>
+		/// <returns>list of 5m candle sticks</returns>
 		/// <param name="api">exchange api</param>
 		/// <param name="symbol">symbol to get the candlesticks from</param>
-		private List<MarketCandle> DownloadCandlesFromExchange(ExchangeAPI api, string symbol)
+		private List<MarketCandle> DownloadCandlesFromExchange(ExchangeAPI api, string symbol, DateTime startDate, DateTime endDate)
 		{
 			// get candle stick data
 			Console.WriteLine($"Downloading 5m candlesticks for {symbol} from {api.Name}");
-			var allCandles = new List<MarketCandle>();
-			var startDate = new DateTime(2018, 1, 1);
+			var allCandles = new List<MarketCandle>(); 
 			while (true)
 			{
 				try
@@ -34,6 +33,7 @@ namespace DayTradeScanner
 					startDate = candles.Last().Timestamp;
 					Console.WriteLine($"date:{candles[0].Timestamp} - {startDate}  / total:{allCandles.Count}");
 					if (candles.Count < 1000) break;
+					if (startDate > endDate) break;
 				}
 				catch (Exception)
 				{
@@ -57,10 +57,25 @@ namespace DayTradeScanner
 			var allCandles = _cache.LoadCandlesFromCache(symbol);
 			if (allCandles == null)
 			{
-				allCandles = DownloadCandlesFromExchange(api, symbol);
+				allCandles = DownloadCandlesFromExchange(api, symbol,new DateTime(2018,1,1,0,0,0), DateTime.Now);
 
 				_cache.SaveCandlesToCache(symbol, allCandles);
 			}
+			foreach (var candle in allCandles) candle.Timestamp = candle.Timestamp.AddHours(2);
+
+			//var startDate = new DateTime(2018, 4, 22, 0, 0, 0);
+			//var endDate = new DateTime(2018, 5, 2, 23, 59,0);
+			//allCandles = allCandles.Where(e => e.Timestamp >=startDate && e.Timestamp <= endDate).ToList();
+
+            /*
+                TYPE MARKT
+                Bull markt 17-7-2017 t/m 31-8-2017
+                Extreme bull markt 13-11-2017 t/m 16-12-2017
+                Bear markt - 5-2-2018 t/m 30-3-2018
+                Extreme bear markt - 7-1-2018 t/m 5-2-2018
+                Sideways markt - 22-4-2018 t/m 2-5-2018
+
+            */
 
 			// Do back testing
 			Console.WriteLine("");
@@ -155,10 +170,10 @@ namespace DayTradeScanner
 
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");
+            Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
+            Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
 			Console.WriteLine($"Starting capital      : $ 1000" );
 			Console.WriteLine($"Ending capital        : $ {capital:0.00}");
-			Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
-			Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp.AddHours(2):dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp.AddHours(2):dd-MM-yyyy HH:mm}");
 			Console.WriteLine($"Trades                : {trades.Count} trades");
 			Console.WriteLine($"Winners               : {winners} trades");
 			Console.WriteLine($"Losers                : {losers} trades");
