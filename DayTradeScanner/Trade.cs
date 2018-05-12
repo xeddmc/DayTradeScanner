@@ -18,14 +18,14 @@ namespace DayTradeScanner
 		public decimal? ClosePrice { get; set; }
 		public TradeType TradeType { get; set; }
 		public decimal? ProfitPercentage { get; set; }
-        public decimal  ProfitDollars { get; set; }
+		public decimal ProfitDollars { get; set; }
 		public bool IsClosed => _state == TradeState.Closed;
 		public int Rebuys { get; set; }
 
 		private decimal RebuyPrice1;
 		private DateTime RebuyDate2;
 
-        private decimal RebuyPrice2;
+		private decimal RebuyPrice2;
 		private DateTime RebuyDate1;
 
 
@@ -57,15 +57,23 @@ namespace DayTradeScanner
 		{
 			if (_state == TradeState.Closed) return;
 
-			// close trade if price gets above the upper bollinger band
-			var lastPrice = candle.HighPrice;
-			if (lastPrice > bbands.Upper)
+			// close trade if price gets above the upper bollinger band for long positions
+            // close trade if price gets below the lower bollinger band for short positions
+			var lastPrice = (TradeType == TradeType.Long) ? candle.HighPrice : candle.LowPrice;
+			if ((TradeType == TradeType.Long  && lastPrice > bbands.Upper) ||
+				(TradeType == TradeType.Short && lastPrice < bbands.Lower))
 			{
 				CloseDate = candle.Timestamp;
 				ClosePrice = lastPrice;
-                
-				_feesPayed += (FeesPercentage / 100m) * _totalInvestment; 
+
+				_feesPayed += (FeesPercentage / 100m) * _totalInvestment;
 				ProfitDollars = (_amountOfCoins * ClosePrice.Value) - _totalInvestment;
+
+                if (TradeType == TradeType.Short)
+                {
+					ProfitDollars = -ProfitDollars;
+                }
+
 				ProfitDollars -= _feesPayed;
 
 				ProfitPercentage = (ProfitDollars / _totalInvestment) * 100m;
@@ -79,47 +87,74 @@ namespace DayTradeScanner
 			switch (_state)
 			{
 				case TradeState.Opened:
-					if (closePrice < bbands.Lower)
+					if (TradeType == TradeType.Long && closePrice < bbands.Lower && stoch.K < 20 && stoch.D < 20)
 					{
-						if (stoch.K < 20 && stoch.D < 20)
+						if (closePrice < RebuyPercentage * OpenPrice)
 						{
-							if (closePrice < RebuyPercentage * OpenPrice)
-							{
-								RebuyPrice1 = closePrice;
-								RebuyDate1 = date;
-								Rebuys = 1;
+							RebuyPrice1 = closePrice;
+							RebuyDate1 = date;
+							Rebuys = 1;
 
-                                var investment = SecondBuyFactor * _bundleSize;
-								var coins = ((investment) / closePrice);
-								_amountOfCoins += coins;
+							var investment = SecondBuyFactor * _bundleSize;
+							var coins = ((investment) / closePrice);
+							_amountOfCoins += coins;
 
-								_totalInvestment += investment;
-								_feesPayed += (FeesPercentage / 100m) * (investment);
-								_state = TradeState.Rebuy1;
-							}
+							_totalInvestment += investment;
+							_feesPayed += (FeesPercentage / 100m) * (investment);
+							_state = TradeState.Rebuy1;
+						}
+					}
+					else if (TradeType == TradeType.Short && closePrice > bbands.Upper && stoch.K > 80 && stoch.D > 80)
+					{
+						if (closePrice > RebuyPercentage * OpenPrice)
+						{
+							RebuyPrice1 = closePrice;
+							RebuyDate1 = date;
+							Rebuys = 1;
+
+							var investment = SecondBuyFactor * _bundleSize;
+							var coins = ((investment) / closePrice);
+							_amountOfCoins += coins;
+
+							_totalInvestment += investment;
+							_feesPayed += (FeesPercentage / 100m) * (investment);
+							_state = TradeState.Rebuy1;
 						}
 					}
 					break;
 
 				case TradeState.Rebuy1:
 
-					if (closePrice < bbands.Lower)
+					if (TradeType == TradeType.Long && closePrice < bbands.Lower && stoch.K < 20 && stoch.D < 20)
 					{
-						if (stoch.K < 20 && stoch.D < 20)
+						if (closePrice < RebuyPercentage * RebuyPrice1)
 						{
-							if (closePrice < RebuyPercentage * RebuyPrice1)
-							{
-								RebuyPrice2 = closePrice;
-								RebuyDate2 = date;
-								Rebuys = 2;
-                                var investment = ThirdBuyFactor * _bundleSize;
-								var coins = ((investment) / closePrice);
-								_amountOfCoins += coins;
+							RebuyPrice2 = closePrice;
+							RebuyDate2 = date;
+							Rebuys = 2;
+							var investment = ThirdBuyFactor * _bundleSize;
+							var coins = ((investment) / closePrice);
+							_amountOfCoins += coins;
 
-                                _totalInvestment += investment;
-                                _feesPayed += (FeesPercentage / 100m) * (investment);
-								_state = TradeState.Rebuy2;
-							}
+							_totalInvestment += investment;
+							_feesPayed += (FeesPercentage / 100m) * (investment);
+							_state = TradeState.Rebuy2;
+						}
+					}
+					else if (TradeType == TradeType.Short && closePrice > bbands.Upper && stoch.K > 80 && stoch.D > 80)
+					{
+						if (closePrice > RebuyPercentage * RebuyPrice1)
+						{
+							RebuyPrice2 = closePrice;
+							RebuyDate2 = date;
+							Rebuys = 2;
+							var investment = ThirdBuyFactor * _bundleSize;
+							var coins = ((investment) / closePrice);
+							_amountOfCoins += coins;
+
+							_totalInvestment += investment;
+							_feesPayed += (FeesPercentage / 100m) * (investment);
+							_state = TradeState.Rebuy2;
 						}
 					}
 					break;
@@ -141,7 +176,7 @@ namespace DayTradeScanner
 			{
 				case 0:
 					break;
-				
+
 				case 1:
 					Console.WriteLine($"  rebuy #1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000}");
 					break;

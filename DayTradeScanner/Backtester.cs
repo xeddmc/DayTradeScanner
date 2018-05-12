@@ -21,7 +21,7 @@ namespace DayTradeScanner
 		{
 			// get candle stick data
 			Console.WriteLine($"Downloading 5m candlesticks for {symbol} from {api.Name}");
-			var allCandles = new List<MarketCandle>(); 
+			var allCandles = new List<MarketCandle>();
 			while (true)
 			{
 				try
@@ -54,12 +54,12 @@ namespace DayTradeScanner
 		public void Test(ExchangeAPI api, string symbol)
 		{
 			// Get all candle sticks
-			var allCandles = _cache.LoadCandlesFromCache(symbol);
+			var allCandles = _cache.Load(symbol);
 			if (allCandles == null)
 			{
-				allCandles = DownloadCandlesFromExchange(api, symbol,new DateTime(2018,1,1,0,0,0), DateTime.Now);
+				allCandles = DownloadCandlesFromExchange(api, symbol, new DateTime(2018, 1, 1, 0, 0, 0), DateTime.Now);
 
-				_cache.SaveCandlesToCache(symbol, allCandles);
+				_cache.Save(symbol, allCandles);
 			}
 			foreach (var candle in allCandles) candle.Timestamp = candle.Timestamp.AddHours(2);
 
@@ -67,7 +67,7 @@ namespace DayTradeScanner
 			//var endDate = new DateTime(2018, 5, 2, 23, 59,0);
 			//allCandles = allCandles.Where(e => e.Timestamp >=startDate && e.Timestamp <= endDate).ToList();
 
-            /*
+			/*
                 TYPE MARKT
                 Bull markt 17-7-2017 t/m 31-8-2017
                 Extreme bull markt 13-11-2017 t/m 16-12-2017
@@ -97,28 +97,25 @@ namespace DayTradeScanner
 						capital += trade.ProfitDollars;
 						trades.Add(trade);
 						trade = null;
-
 					}
 				}
-				else
+				else if (bbands.Bandwidth >= 2.0m)
 				{
-					if (bbands.Bandwidth >= 2.0m)
+					if (stoch.K < 20 && stoch.D < 20 && candle.ClosePrice < bbands.Lower)
 					{
-						if (stoch.K < 20 && stoch.D < 20)
-						{
-							if (candle.ClosePrice < bbands.Lower)
-							{
-								trade = new Trade(symbol, candle.Timestamp, TradeType.Long, candle.ClosePrice, capital);
-							}
-						}
+						// long
+						trade = new Trade(symbol, candle.Timestamp, TradeType.Long, candle.ClosePrice, capital);
+					}
+					else if (stoch.K > 80 && stoch.D > 80 && candle.ClosePrice > bbands.Upper)
+					{
+						// short
+						//trade = new Trade(symbol, candle.Timestamp, TradeType.Short, candle.ClosePrice, capital);
 					}
 				}
 			}
 
 
 			// Show statistics
-
-
 			double winners = 0;
 			double losers = 0;
 			double totalProfit = 0;
@@ -170,9 +167,9 @@ namespace DayTradeScanner
 
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");
-            Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
-            Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
-			Console.WriteLine($"Starting capital      : $ 1000" );
+			Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
+			Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
+			Console.WriteLine($"Starting capital      : $ 1000");
 			Console.WriteLine($"Ending capital        : $ {capital:0.00}");
 			Console.WriteLine($"Trades                : {trades.Count} trades");
 			Console.WriteLine($"Winners               : {winners} trades");

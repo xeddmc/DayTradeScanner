@@ -55,7 +55,7 @@ namespace DayTradeScanner
 
     public class Cache
     {
-		public List<MarketCandle> LoadCandlesFromCache(string symbol)
+		public List<MarketCandle> Load(string symbol)
         {
             if (File.Exists($"{symbol}-candles.dat"))
             {
@@ -76,7 +76,7 @@ namespace DayTradeScanner
             return null;
         }
 
-        public void SaveCandlesToCache(string symbol, List<MarketCandle> marketCandles)
+        public void Save(string symbol, List<MarketCandle> marketCandles)
         {
 			// store candles on disk
 			var cache = new CacheCandleList();
