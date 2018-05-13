@@ -58,7 +58,7 @@ namespace DayTradeScanner
 			var bgColor = Console.BackgroundColor;
 			var fgColor = Console.ForegroundColor;
 			Console.WriteLine("Daytrader scanner 1.0");
-			Console.WriteLine($"Construct list of {currency} symbols with 24hr volume > {volume} on {exchange}");
+			Console.WriteLine($"Construct list of {currency} symbols with 24hr volume > {volume} {currency} on {exchange}");
 			Task.Run(async () =>
 			{
 				Console.WriteLine("Downloading all symbols...");
