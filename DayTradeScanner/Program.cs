@@ -73,8 +73,8 @@ namespace DayTradeScanner
 				{
 					if (!symbol.ToLowerInvariant().Contains(currency.ToLowerInvariant()))
 					{
-			// only scan USD pairs
-			continue;
+            			// only scan valid pairs
+            			continue;
 					}
 
 					var ticker = allTickers.FirstOrDefault(e => e.Key == symbol).Value;

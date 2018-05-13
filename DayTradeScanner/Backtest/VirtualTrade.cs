@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using DayTradeScanner.Bot;
+using DayTradeScanner.Bot.Interfaces;
 
 namespace DayTradeScanner.Backtest
 {
@@ -7,6 +9,7 @@ namespace DayTradeScanner.Backtest
 	{
 		public VirtualTrade()
 		{
+			Rebuys = new List<IRebuy>();
 		}
 
 		/// <summary>
@@ -76,43 +79,17 @@ namespace DayTradeScanner.Backtest
 		/// <value>total amount of fees paid for this trade.</value>
 		public decimal FeesPaid { get; set; }
 
-		/// <summary>
-		/// Gets or sets the number rebuys done in this trade
-		/// </summary>
-		/// <value>the number rebuys done in this trade.</value>
-		public int RebuyCount { get; set; }
-
 		public decimal InitialCoins { get; set; }
 		public decimal InitialInvestment { get; set; }
-
-		public decimal RebuyInvestment1 { get; set; }
-		public decimal RebuyCoins1 { get; set; }
-		public decimal RebuyPrice1 { get; set; }
-		public DateTime RebuyDate1 { get; set; }
-
-		public decimal RebuyInvestment2 { get; set; }
-		public decimal RebuyCoins2 { get; set; }
-		public decimal RebuyPrice2 { get; set; }
-		public DateTime RebuyDate2 { get; set; }
-
+		public List<IRebuy> Rebuys { get; set; }
 
 		public void Dump()
 		{
 			Console.WriteLine($"{OpenDate:dd-MM-yyyy HH:mm}/{CloseDate:dd-MM-yyyy HH:mm} {TradeType} open:{OpenPrice:0.000000} close: {ClosePrice:0.000000}  profit:{ProfitPercentage:0.00} %");
 			Console.WriteLine($"    buy #1: coins:{InitialCoins:0.0000} ${InitialInvestment:0.00}");
-			switch (RebuyCount)
+			foreach (var rebuy in Rebuys)
 			{
-				case 0:
-					break;
-
-				case 1:
-					Console.WriteLine($"  rebuy #1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000} coins:{RebuyCoins1:0.0000} ${RebuyInvestment1:0.00}");
-					break;
-
-				case 2:
-					Console.WriteLine($"  rebuy #1: {RebuyDate1:dd-MM-yyyy HH:mm} {RebuyPrice1:0.000000} coins:{RebuyCoins1:0.0000} ${RebuyInvestment1:0.00}");
-					Console.WriteLine($"  rebuy #2: {RebuyDate2:dd-MM-yyyy HH:mm} {RebuyPrice2:0.000000} coins:{RebuyCoins2:0.0000} ${RebuyInvestment2:0.00}");
-					break;
+				Console.WriteLine($"  rebuy : {rebuy.Date:dd-MM-yyyy HH:mm} {rebuy.Price:0.000000} coins:{rebuy.Coins:0.0000} ${rebuy.Investment:0.00}");
 			}
 		}
 	}

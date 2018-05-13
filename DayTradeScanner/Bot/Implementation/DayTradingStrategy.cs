@@ -11,11 +11,15 @@ namespace DayTradeScanner.Bot.Implementation
 			Scanning,
 			Opened,
 			Rebuy1,
-			Rebuy2
+			Rebuy2,
+			Waiting
 		}
 		private const decimal RebuyPercentage = 0.9825m; //1.75%
-		private const decimal SecondBuyFactor = 2m; // 2x
-		private const decimal ThirdBuyFactor = 4m;  // 4x 
+		private const decimal FirstRebuyFactor = 2m;  // 2x
+		private const decimal SecondRebuyFactor = 4m;   // 4x 
+		private const decimal ThirdRebuyFactor = 8m;  // 8x 
+		private const int MaxTimesRebuy = 2;
+		private const bool AllowShorting = false;
 
 		private readonly string _symbol;
 		private readonly ITradeManager _tradeManager;
@@ -47,12 +51,16 @@ namespace DayTradeScanner.Bot.Implementation
 					CloseTradeIfPossible(candles, bar);
 					if (_trade == null) return;
 
-					if (CanRebuy(candles, bar))
+					if (MaxTimesRebuy >= 1)
 					{
-						var candle = candles[bar];
-						if (DoRebuy(candle, SecondBuyFactor))
+						if (CanRebuy(candles, bar))
 						{
-							_state = StrategyState.Rebuy1;
+							var candle = candles[bar];
+							if (DoRebuy(candle, FirstRebuyFactor))
+							{
+
+								_state = StrategyState.Rebuy1;
+							}
 						}
 					}
 					break;
@@ -61,17 +69,37 @@ namespace DayTradeScanner.Bot.Implementation
 					CloseTradeIfPossible(candles, bar);
 					if (_trade == null) return;
 
-					if (CanRebuy(candles, bar))
+					if (MaxTimesRebuy >= 2)
 					{
-						var candle = candles[bar];
-						if (DoRebuy(candle, ThirdBuyFactor))
+						if (CanRebuy(candles, bar))
 						{
-							_state = StrategyState.Rebuy2;
+							var candle = candles[bar];
+							if (DoRebuy(candle, SecondRebuyFactor))
+							{
+								_state = StrategyState.Rebuy2;
+							}
 						}
 					}
 					break;
 
 				case StrategyState.Rebuy2:
+					CloseTradeIfPossible(candles, bar);
+					if (_trade == null) return;
+
+					if (MaxTimesRebuy >= 3)
+					{
+						if (CanRebuy(candles, bar))
+						{
+							var candle = candles[bar];
+							if (DoRebuy(candle, ThirdRebuyFactor))
+							{
+								_state = StrategyState.Waiting;
+							}
+						}
+					}
+					break;
+
+				case StrategyState.Waiting:
 					CloseTradeIfPossible(candles, bar);
 					break;
 			}
@@ -121,7 +149,7 @@ namespace DayTradeScanner.Bot.Implementation
 					tradeType = TradeType.Long;
 					return true;
 				}
-				else if (candle.ClosePrice > bbands.Upper && stoch.K > 80 && stoch.D > 80)
+				else if (candle.ClosePrice > bbands.Upper && stoch.K > 80 && stoch.D > 80 && AllowShorting)
 				{
 					// open sell order when price closes above upper bollinger bands
 					// and stochastics K & D are both above 80
@@ -143,13 +171,18 @@ namespace DayTradeScanner.Bot.Implementation
 			if (IsValidEntry(candles, bar, out tradeType))
 			{
 				var candle = candles[bar];
-				_bundleSize = _tradeManager.AccountBalance / (1m + SecondBuyFactor + ThirdBuyFactor);
+				var totalRebuy = 1m;
+				if (MaxTimesRebuy >= 1) totalRebuy += FirstRebuyFactor;
+				if (MaxTimesRebuy >= 2) totalRebuy += SecondRebuyFactor;
+				if (MaxTimesRebuy >= 3) totalRebuy += ThirdRebuyFactor;
+				_bundleSize = _tradeManager.AccountBalance / totalRebuy;
 				var coins = _bundleSize / candle.ClosePrice;
 				switch (tradeType)
 				{
 					case TradeType.Long:
 						_trade = _tradeManager.BuyMarket(_symbol, coins);
 						break;
+
 					case TradeType.Short:
 						_trade = _tradeManager.SellMarket(_symbol, coins);
 						break;
@@ -179,7 +212,9 @@ namespace DayTradeScanner.Bot.Implementation
 			if (_trade.TradeType == TradeType.Long && candle.ClosePrice < bbands.Lower && stoch.K < 20 && stoch.D < 20)
 			{
 				var price = _trade.OpenPrice * RebuyPercentage;
-				if (_trade.RebuyCount > 0) price = price * RebuyPercentage;
+				if (_trade.Rebuys.Count >= 1) price = price * RebuyPercentage;
+				if (_trade.Rebuys.Count >= 2) price = price * RebuyPercentage;
+				if (_trade.Rebuys.Count >= 3) price = price * RebuyPercentage;
 				return candle.ClosePrice <= price;
 			}
 
@@ -189,7 +224,9 @@ namespace DayTradeScanner.Bot.Implementation
 			{
 				var factor = 1m + (1m - RebuyPercentage);
 				var price = _trade.OpenPrice * factor;
-				if (_trade.RebuyCount > 0) price = price * factor;
+				if (_trade.Rebuys.Count >= 1) price = price * factor;
+				if (_trade.Rebuys.Count >= 2) price = price * factor;
+				if (_trade.Rebuys.Count >= 3) price = price * factor;
 				return candle.ClosePrice >= price;
 			}
 			return false;

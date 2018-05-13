@@ -36,7 +36,6 @@ namespace DayTradeScanner.Backtest
 				ClosePrice = 0,
 				ProfitDollars = 0,
 				ProfitPercentage = 0,
-				RebuyCount = 0,
 				FeesPaid = (FeesPercentage / 100m) * (investment),
 				InitialInvestment = investment,
 				InitialCoins = amountOfCoins
@@ -64,7 +63,6 @@ namespace DayTradeScanner.Backtest
 				ClosePrice = 0,
 				ProfitDollars = 0,
 				ProfitPercentage = 0,
-				RebuyCount = 0,
 				FeesPaid = (FeesPercentage / 100m) * (investment),
 				InitialInvestment = investment,
 				InitialCoins = amountOfCoins
@@ -85,21 +83,15 @@ namespace DayTradeScanner.Backtest
 			vtrade.Investment += investment;
 			vtrade.Coins += coins;
 			vtrade.FeesPaid += (FeesPercentage / 100m) * investment;
-			if (vtrade.RebuyCount == 0)
+
+			var rebuy = new VirtualRebuy()
 			{
-				vtrade.RebuyDate1 = Candle.Timestamp;
-				vtrade.RebuyCoins1 = coins;
-				vtrade.RebuyPrice1 = Candle.ClosePrice;
-				vtrade.RebuyInvestment1 = investment;
-			}
-			else
-			{
-				vtrade.RebuyDate2 = Candle.Timestamp;
-				vtrade.RebuyCoins2 = coins;
-				vtrade.RebuyPrice2 = Candle.ClosePrice;
-				vtrade.RebuyInvestment2 = investment;
-			}
-			vtrade.RebuyCount++;
+				Date = Candle.Timestamp,
+				Coins = coins,
+				Investment = investment,
+				Price = Candle.ClosePrice
+			};
+			vtrade.Rebuys.Add(rebuy);
 
 			return true;
 		}
@@ -117,21 +109,15 @@ namespace DayTradeScanner.Backtest
 			vtrade.Investment += investment;
 			vtrade.Coins += coins;
 			vtrade.FeesPaid += (FeesPercentage / 100m) * investment;
-			if (vtrade.RebuyCount == 0)
+
+			var rebuy = new VirtualRebuy()
 			{
-				vtrade.RebuyDate1 = Candle.Timestamp;
-				vtrade.RebuyCoins1 = coins;
-				vtrade.RebuyPrice1 = Candle.ClosePrice;
-				vtrade.RebuyInvestment1 = investment;
-			}
-			else
-			{
-				vtrade.RebuyDate2 = Candle.Timestamp;
-				vtrade.RebuyCoins2 = coins;
-				vtrade.RebuyPrice2 = Candle.ClosePrice;
-				vtrade.RebuyInvestment2 = investment;
-			}
-			vtrade.RebuyCount++;
+				Date = Candle.Timestamp,
+				Coins = coins,
+				Investment = investment,
+				Price = Candle.ClosePrice
+			};
+			vtrade.Rebuys.Add(rebuy);
 			return true;
 		}
 
@@ -187,15 +173,16 @@ namespace DayTradeScanner.Backtest
 			double reBuys0 = 0;
 			double reBuys1 = 0;
 			double reBuys2 = 0;
+			double reBuys3 = 0;
+			double reBuys4 = 0;
 			double maxProfit = 0;
 			double maxLoss = 0;
 			var shortestTrade = TimeSpan.MaxValue;
 			var longestTrade = TimeSpan.MinValue;
+
 			foreach (var trade in Trades)
 			{
 				var vtrade = (VirtualTrade)trade;
-				vtrade.Dump();
-
 				var profit = (double)trade.ProfitPercentage;
 				totalProfit += profit;
 				if (profit < 0)
@@ -214,14 +201,18 @@ namespace DayTradeScanner.Backtest
 				if (duration < shortestTrade) shortestTrade = duration;
 				if (duration > longestTrade) longestTrade = duration;
 
-				if (trade.RebuyCount == 0) reBuys0++;
-				else if (trade.RebuyCount == 1) reBuys1++;
-				else if (trade.RebuyCount == 2) reBuys2++;
+				if (trade.Rebuys.Count == 0) reBuys0++;
+				else if (trade.Rebuys.Count == 1) reBuys1++;
+				else if (trade.Rebuys.Count == 2) reBuys2++;
+				else if (trade.Rebuys.Count == 3) reBuys3++;
+				else if (trade.Rebuys.Count == 4) reBuys4++;
 			}
 
 			reBuys0 = 100.0 * (reBuys0 / Trades.Count);
 			reBuys1 = 100.0 * (reBuys1 / Trades.Count);
 			reBuys2 = 100.0 * (reBuys2 / Trades.Count);
+			reBuys3 = 100.0 * (reBuys3 / Trades.Count);
+			reBuys4 = 100.0 * (reBuys4 / Trades.Count);
 
 			double winPercentage = winners / (winners + losers);
 			winPercentage *= 100.0;
@@ -238,6 +229,8 @@ namespace DayTradeScanner.Backtest
 			Console.WriteLine($"Trades with no rebuys : {reBuys0:0.00} %");
 			Console.WriteLine($"Trades with 1 rebuy   : {reBuys1:0.00} %");
 			Console.WriteLine($"Trades with 2 rebuys  : {reBuys2:0.00} %");
+			Console.WriteLine($"Trades with 3 rebuys  : {reBuys3:0.00} %");
+			Console.WriteLine($"Trades with 4 rebuys  : {reBuys4:0.00} %");
 
 			Console.WriteLine($"Average profit/trade  : {averageProfit:0.00} %");
 			Console.WriteLine($"Max profit            : {maxProfit:0.00} %");
