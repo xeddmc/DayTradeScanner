@@ -74,8 +74,12 @@ namespace DayTradeScanner
 				virtualTradeManager.Candle = allCandles[i];
 				strategy.OnCandle(allCandles, i);
 			}
+            
 
-
+			foreach (var trade in virtualTradeManager.Trades)
+			{
+				((VirtualTrade)trade).Dump();
+			}
 			// show results
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");

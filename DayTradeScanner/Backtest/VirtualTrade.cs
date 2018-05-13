@@ -7,11 +7,15 @@ namespace DayTradeScanner.Backtest
 {
 	public class VirtualTrade : ITrade
 	{
+		private static int _tradeId = 1;
 		public VirtualTrade()
 		{
 			Rebuys = new List<IRebuy>();
+			TradeId = _tradeId;
+			_tradeId++;
 		}
 
+		public int TradeId { get; set; }
 		/// <summary>
 		/// Gets or sets the symbol.
 		/// </summary>
@@ -85,12 +89,16 @@ namespace DayTradeScanner.Backtest
 
 		public void Dump()
 		{
-			Console.WriteLine($"{OpenDate:dd-MM-yyyy HH:mm}/{CloseDate:dd-MM-yyyy HH:mm} {TradeType} open:{OpenPrice:0.000000} close: {ClosePrice:0.000000}  profit:{ProfitPercentage:0.00} %");
-			Console.WriteLine($"    buy #1: coins:{InitialCoins:0.0000} ${InitialInvestment:0.00}");
+			Console.WriteLine($"{Symbol} trade:#{TradeId} {TradeType}");
+			Console.WriteLine($"{Symbol} Open : {OpenDate:dd-MM-yyyy HH:mm} price:{OpenPrice:0.000000} coins:{InitialCoins:0.0000} ${InitialInvestment:0.00}");
+	
 			foreach (var rebuy in Rebuys)
 			{
-				Console.WriteLine($"  rebuy : {rebuy.Date:dd-MM-yyyy HH:mm} {rebuy.Price:0.000000} coins:{rebuy.Coins:0.0000} ${rebuy.Investment:0.00}");
-			}
+				Console.WriteLine($"{Symbol} Add  : {rebuy.Date:dd-MM-yyyy HH:mm} price:{rebuy.Price:0.000000} coins:{rebuy.Coins:0.0000} ${rebuy.Investment:0.00}");
+			}    
+			Console.WriteLine($"{Symbol} Close: {CloseDate:dd-MM-yyyy HH:mm} price:{ClosePrice:0.000000} coins:{Coins:0.0000} ${Investment:0.00} profit:{ProfitPercentage:0.00}% / ${ProfitDollars:0.00}");
+    
+			Console.WriteLine();
 		}
 	}
 }
