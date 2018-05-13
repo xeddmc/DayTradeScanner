@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using DayTradeScanner.Backtest;
+using DayTradeScanner.Bot.Implementation;
 using ExchangeSharp;
 using Microsoft.Extensions.Configuration;
 
@@ -13,9 +15,9 @@ namespace DayTradeScanner
 		public static IConfigurationRoot Configuration;
 		static void Main(string[] args)
 		{         
-			//var tester = new BackTester();
-			//tester.Test(new ExchangeBitfinexAPI(), "NEOUSD");
-
+			var tester = new BackTester();
+			//tester.Test(new ExchangeBitfinexAPI(), "EOSUSD");
+            
 			var builder = new ConfigurationBuilder()
 				.SetBasePath(Path.Combine(AppContext.BaseDirectory))
 				.AddJsonFile("appsettings.json", optional: true);
@@ -25,7 +27,6 @@ namespace DayTradeScanner
 			var exchange = Configuration["Exchange"];
 			var currency = Configuration["Currency"].ToString();
 			var volume = long.Parse(Configuration["Min24HrVolume"]);
-			var minBBWPercentage = decimal.Parse(Configuration["MinBollingBandWidthPercentage"]);
 
 			ExchangeAPI api = null;
 			switch (exchange.ToLowerInvariant())
@@ -62,6 +63,7 @@ namespace DayTradeScanner
 			{
 				Console.WriteLine("Downloading all symbols...");
 				var allSymbols = await api.GetSymbolsAsync();
+
 				Console.WriteLine("Downloading tickers...");
 				var allTickers = await api.GetTickersAsync();
 
@@ -91,45 +93,27 @@ namespace DayTradeScanner
 				{
 					Console.WriteLine($"scanning...");
 					date = DateTime.Now;
+
 					foreach (var symbol in symbols)
 					{
 						try
 						{
-							var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 100))).Reverse().ToList();
+                            var strategy = new DayTradingStrategy(symbol, new VirtualTradeManager() );
+							var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 50))).Reverse().ToList();
 
-							var bbands = new BollingerBands(candles,0);
-							var stoch = new Stochastics(candles,0);
-
-							if (bbands.Bandwidth >= minBBWPercentage)
+							TradeType tradeType;
+							if (strategy.IsValidEntry(candles, 0, out tradeType))
 							{
-								if (stoch.K < 20 && stoch.D < 20)
-								{
-									if (candles[0].ClosePrice < bbands.Lower)
-									{
-										Console.Beep();
-										Console.BackgroundColor = ConsoleColor.Red;
-										Console.ForegroundColor = ConsoleColor.White;
-										Console.WriteLine($"{symbol} long signal found");
-										Console.BackgroundColor = bgColor;
-										Console.ForegroundColor = fgColor;
-									}
-								}
-								else if (stoch.K > 80 && stoch.D > 80)
-								{
-									if (candles[0].ClosePrice > bbands.Upper)
-									{
-										Console.Beep();
-										Console.BackgroundColor = ConsoleColor.Red;
-										Console.ForegroundColor = ConsoleColor.White;
-										Console.WriteLine($"{symbol} short signal found");
-										Console.BackgroundColor = bgColor;
-										Console.ForegroundColor = fgColor;
-									}
-								}
+                                Console.Beep();
+                                Console.BackgroundColor = ConsoleColor.Red;
+                                Console.ForegroundColor = ConsoleColor.White;
+								Console.WriteLine($"{symbol} {tradeType} signal found");
+                                Console.BackgroundColor = bgColor;
+                                Console.ForegroundColor = fgColor;
 							}
 						}
-						catch(Exception){
-							
+						catch(Exception)
+						{
 						}
 					}
 

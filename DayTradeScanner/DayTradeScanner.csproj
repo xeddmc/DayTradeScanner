@@ -22,5 +22,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="DayTradeStrategy.cs" />
+    <Compile Remove="Backtest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Bot\" />
+    <Folder Include="Backtest\" />
+    <Folder Include="Indicators\" />
+    <Folder Include="Bot\Interfaces\" />
+    <Folder Include="Bot\Implementation\" />
   </ItemGroup>
 </Project>
