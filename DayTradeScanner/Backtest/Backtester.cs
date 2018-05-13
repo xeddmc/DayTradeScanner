@@ -66,7 +66,7 @@ namespace DayTradeScanner
 			foreach (var candle in allCandles) candle.Timestamp = candle.Timestamp.AddHours(2);
 
 
-            // backtest
+			// backtest
 			var virtualTradeManager = new VirtualTradeManager();
 			var strategy = new DayTradingStrategy(symbol, virtualTradeManager);
 			for (int i = allCandles.Count - 50; i > 0; i--)
@@ -76,15 +76,15 @@ namespace DayTradeScanner
 			}
 
 
-            // show results
+			// show results
 			Console.WriteLine("");
-            Console.WriteLine("Backtesting results");
-            Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
-            Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
+			Console.WriteLine("Backtesting results");
+			Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
+			Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
 
-            Console.WriteLine($"Starting capital      : $ 1000");
+			Console.WriteLine($"Starting capital      : $ 1000");
 			Console.WriteLine($"Ending capital        : $ {virtualTradeManager.AccountBalance:0.00}");
-            virtualTradeManager.DumpStatistics();
+			virtualTradeManager.DumpStatistics();
 			Console.ReadLine();
 		}
 	}

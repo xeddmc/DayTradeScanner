@@ -142,7 +142,7 @@ namespace DayTradeScanner.Bot.Implementation
 			TradeType tradeType;
 			if (IsValidEntry(candles, bar, out tradeType))
 			{
-                var candle = candles[bar];
+				var candle = candles[bar];
 				_bundleSize = _tradeManager.AccountBalance / (1m + SecondBuyFactor + ThirdBuyFactor);
 				var coins = _bundleSize / candle.ClosePrice;
 				switch (tradeType)

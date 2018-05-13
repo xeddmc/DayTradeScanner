@@ -14,13 +14,13 @@ namespace DayTradeScanner
 	{
 		public static IConfigurationRoot Configuration;
 		static void Main(string[] args)
-		{         
+		{
 			var tester = new BackTester();
 			//tester.Test(new ExchangeBitfinexAPI(), "EOSUSD");
-            
+
 			var builder = new ConfigurationBuilder()
-				.SetBasePath(Path.Combine(AppContext.BaseDirectory))
-				.AddJsonFile("appsettings.json", optional: true);
+			.SetBasePath(Path.Combine(AppContext.BaseDirectory))
+			.AddJsonFile("appsettings.json", optional: true);
 
 			Configuration = builder.Build();
 
@@ -46,9 +46,9 @@ namespace DayTradeScanner
 				case "gdax":
 					api = new ExchangeGdaxAPI();
 					break;
-                case "hitbtc":
-                    api = new ExchangeHitbtcAPI();
-                    break;
+				case "hitbtc":
+					api = new ExchangeHitbtcAPI();
+					break;
 				default:
 					Console.WriteLine($"Unknown exchange:{Configuration["Exchange"]}");
 					return;
@@ -68,22 +68,22 @@ namespace DayTradeScanner
 				var allTickers = await api.GetTickersAsync();
 
 				Console.WriteLine($"Filtering symbols with {currency} and 24hr volume > {volume}");
-			    var symbols = new List<string>();
+				var symbols = new List<string>();
 				foreach (var symbol in allSymbols)
 				{
 					if (!symbol.ToLowerInvariant().Contains(currency.ToLowerInvariant()))
 					{
-						// only scan USD pairs
-						continue;
+			// only scan USD pairs
+			continue;
 					}
 
 					var ticker = allTickers.FirstOrDefault(e => e.Key == symbol).Value;
 					if (ticker.Volume.ConvertedVolume < volume)
 					{
-                        Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} skipped");
+						Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} skipped");
 						continue;
 					}
-                    Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} added!");
+					Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} added!");
 					symbols.Add(symbol);
 				}
 
@@ -98,21 +98,21 @@ namespace DayTradeScanner
 					{
 						try
 						{
-                            var strategy = new DayTradingStrategy(symbol, new VirtualTradeManager() );
+							var strategy = new DayTradingStrategy(symbol, new VirtualTradeManager());
 							var candles = (await api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 50))).Reverse().ToList();
 
 							TradeType tradeType;
 							if (strategy.IsValidEntry(candles, 0, out tradeType))
 							{
-                                Console.Beep();
-                                Console.BackgroundColor = ConsoleColor.Red;
-                                Console.ForegroundColor = ConsoleColor.White;
+								Console.Beep();
+								Console.BackgroundColor = ConsoleColor.Red;
+								Console.ForegroundColor = ConsoleColor.White;
 								Console.WriteLine($"{symbol} {tradeType} signal found");
-                                Console.BackgroundColor = bgColor;
-                                Console.ForegroundColor = fgColor;
+								Console.BackgroundColor = bgColor;
+								Console.ForegroundColor = fgColor;
 							}
 						}
-						catch(Exception)
+						catch (Exception)
 						{
 						}
 					}
