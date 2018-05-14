@@ -82,6 +82,7 @@ namespace DayTradeScanner
 				// add to list
 				_symbols.Add(symbol);
 			}
+			_symbols = _symbols.OrderBy(e => e).ToList();
 		}
 
 

@@ -68,7 +68,7 @@ namespace DayTrader
 			var volume = 500000L;
 
 			SetStatusText($"initializing {exchange} with 24hr volume of {volume} {currency}...");
-			_scanner = new Scanner(exchange, currency, 500000);
+			_scanner = new Scanner(exchange, currency, volume);
 			while (_running)
 			{
 				await Dispatcher.UIThread.InvokeAsync(() =>
@@ -76,9 +76,11 @@ namespace DayTrader
 					Signals.Clear();
 				});
 
+				int idx = 0;
 				foreach (var symbol in _scanner.Symbols)
 				{
-					SetStatusText($"scanning {symbol}...");
+					idx++;
+					SetStatusText($"scanning {symbol} ({idx}/{_scanner.Symbols.Count})...");
 					var signal = await _scanner.ScanAsync(symbol);
 					if (signal != null)
 					{

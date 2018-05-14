@@ -17,8 +17,9 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Gap="16">
-                        <TextBlock Text="{Binding Symbol}" Width="200" />
-                        <TextBlock Text="{Binding Trade}" Width="200" />
+                        <TextBlock Text="{Binding Date}" Width="200" />
+                        <TextBlock Text="{Binding Symbol}" Width="100" />
+                        <TextBlock Text="{Binding Trade}" Width="100" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
