@@ -4,7 +4,7 @@
         <StackPanel Orientation="Horizontal" Gap="16" Background="#cccccc">
             <Menu Margin="5,5,5,5">
                 <MenuItem Header="File">
-                    <MenuItem Header="Settings" />
+                    <MenuItem Header="Settings" Name="menuItemSettings"/>
                     <MenuItem Header="Quit" />
                 </MenuItem>
             </Menu>

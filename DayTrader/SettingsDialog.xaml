@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Window xmlns="https://github.com/avaloniaui" Title="Settings" MinWidth="640" MinHeight="480" Width="640" Height="480">
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
+        <TextBlock Text="Exchange" Grid.Row="0" Grid.Column="0" />
+        <TextBlock Text="Currency" Grid.Row="1" Grid.Column="0" />
+        <TextBlock Text="Min 24hr Volume" Grid.Row="2" Grid.Column="0" />
+        <DropDown Grid.Row="0" Grid.Column="1">
+        </DropDown>
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Gap="10">
+            <CheckBox>USD</CheckBox>
+            <CheckBox>EUR</CheckBox>
+            <CheckBox>BTC</CheckBox>
+            <CheckBox>ETH</CheckBox>
+            <CheckBox>BNB</CheckBox>
+        </StackPanel>
+        <TextBox Grid.Row="2" Grid.Column="1">100</TextBox>
+    </Grid>
+</Window>

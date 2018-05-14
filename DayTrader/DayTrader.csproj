@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
       <Compile Update="**\*.xaml.cs">
-          <DependentUpon>%(Filename)</DependentUpon>
       </Compile>
       <EmbeddedResource Include="**\*.xaml">
           <SubType>Designer</SubType>

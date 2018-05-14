@@ -19,6 +19,7 @@ namespace DayTrader
 	{
 		private Scanner _scanner;
 		private Button btnStart;
+		private MenuItem menuItemSettings;
 		private Thread _thread;
 		private bool _running;
 
@@ -36,9 +37,17 @@ namespace DayTrader
 			AvaloniaXamlLoaderPortableXaml.Load(this);
 			this.AttachDevTools();
 			btnStart = this.Find<Button>("btnStart");
-			btnStart.Click += btnStart_Click;
+			menuItemSettings = this.Find<MenuItem>("menuItemSettings");
+			btnStart.Click += menuItemSettings_Click;
+			menuItemSettings.Click += menuItemSettings_Click;
 		}
 
+
+		private void menuItemSettings_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
+		{
+			var dlg = new SettingsDialog();
+			dlg.ShowDialog();
+		}
 
 		private void btnStart_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
 		{
