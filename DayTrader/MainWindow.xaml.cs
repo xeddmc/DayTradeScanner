@@ -38,7 +38,7 @@ namespace DayTrader
 			this.AttachDevTools();
 			btnStart = this.Find<Button>("btnStart");
 			menuItemSettings = this.Find<MenuItem>("menuItemSettings");
-			btnStart.Click += menuItemSettings_Click;
+			btnStart.Click += btnStart_Click;
 			menuItemSettings.Click += menuItemSettings_Click;
 		}
 
