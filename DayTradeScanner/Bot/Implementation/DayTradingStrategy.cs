@@ -21,35 +21,35 @@ namespace DayTradeScanner.Bot.Implementation
 		private const decimal ThirdRebuyFactor = 8m;     // 8x 
 		private const int MaxTimesRebuy = 2;
 		private const bool AllowShorting = true;
-
-		private readonly string _symbol;
-		private readonly ITradeManager _tradeManager;
+  
 
 		private ITrade _trade = null;
 		private decimal _bundleSize;
 		private StrategyState _state = StrategyState.Scanning;
 
-		public DayTradingStrategy(string symbol, ITradeManager tradeManager)
+		public DayTradingStrategy(string symbol)
 		{
-			_symbol = symbol;
-			_tradeManager = tradeManager;
+			Symbol = symbol; 
 		}
+
+		public string Symbol { get; set; }
 
 		/// <summary>
 		/// Perform strategy
 		/// </summary>
 		/// <param name="candles">candle history</param>
 		/// <param name="bar">currentcandle</param>
-		public void OnCandle(List<MarketCandle> candles, int bar)
+        /// <param name="tradeManager">tradeManager</param>
+		public void OnCandle(List<MarketCandle> candles, int bar, ITradeManager tradeManager)
 		{
 			switch (_state)
 			{
 				case StrategyState.Scanning:
-					ScanForEntry(candles, bar);
+					ScanForEntry(candles, bar, tradeManager);
 					break;
 
 				case StrategyState.Opened:
-					CloseTradeIfPossible(candles, bar);
+					CloseTradeIfPossible(candles, bar, tradeManager);
 					if (_trade == null) return;
 
 					if (MaxTimesRebuy >= 1)
@@ -57,7 +57,7 @@ namespace DayTradeScanner.Bot.Implementation
 						if (CanRebuy(candles, bar))
 						{
 							var candle = candles[bar];
-							if (DoRebuy(candle, FirstRebuyFactor))
+							if (DoRebuy(candle, FirstRebuyFactor, tradeManager))
 							{
 
 								_state = StrategyState.Rebuy1;
@@ -67,7 +67,7 @@ namespace DayTradeScanner.Bot.Implementation
 					break;
 
 				case StrategyState.Rebuy1:
-					CloseTradeIfPossible(candles, bar);
+					CloseTradeIfPossible(candles, bar, tradeManager);
 					if (_trade == null) return;
 
 					if (MaxTimesRebuy >= 2)
@@ -75,7 +75,7 @@ namespace DayTradeScanner.Bot.Implementation
 						if (CanRebuy(candles, bar))
 						{
 							var candle = candles[bar];
-							if (DoRebuy(candle, SecondRebuyFactor))
+							if (DoRebuy(candle, SecondRebuyFactor, tradeManager))
 							{
 								_state = StrategyState.Rebuy2;
 							}
@@ -84,7 +84,7 @@ namespace DayTradeScanner.Bot.Implementation
 					break;
 
 				case StrategyState.Rebuy2:
-					CloseTradeIfPossible(candles, bar);
+					CloseTradeIfPossible(candles, bar, tradeManager);
 					if (_trade == null) return;
 
 					if (MaxTimesRebuy >= 3)
@@ -92,7 +92,7 @@ namespace DayTradeScanner.Bot.Implementation
 						if (CanRebuy(candles, bar))
 						{
 							var candle = candles[bar];
-							if (DoRebuy(candle, ThirdRebuyFactor))
+							if (DoRebuy(candle, ThirdRebuyFactor, tradeManager))
 							{
 								_state = StrategyState.Waiting;
 							}
@@ -101,7 +101,7 @@ namespace DayTradeScanner.Bot.Implementation
 					break;
 
 				case StrategyState.Waiting:
-					CloseTradeIfPossible(candles, bar);
+					CloseTradeIfPossible(candles, bar, tradeManager);
 					break;
 			}
 		}
@@ -109,8 +109,9 @@ namespace DayTradeScanner.Bot.Implementation
 		/// <summary>
 		/// Adds more to the current position by buying (or selling) more coins.
 		/// </summary>
+        /// <param name="tradeManager">tradeManager</param>
 		/// <returns><c>true</c>, if rebuy was done, <c>false</c> otherwise.</returns>
-		private bool DoRebuy(MarketCandle candle, decimal factor)
+		private bool DoRebuy(MarketCandle candle, decimal factor, ITradeManager tradeManager)
 		{
 			var investment = factor * _bundleSize;
 			var coins = investment / candle.ClosePrice;
@@ -118,10 +119,10 @@ namespace DayTradeScanner.Bot.Implementation
 			switch (_trade.TradeType)
 			{
 				case TradeType.Long:
-					return _tradeManager.BuyMore(_trade, coins);
+					return tradeManager.BuyMore(_trade, coins);
 
 				case TradeType.Short:
-					return _tradeManager.SellMore(_trade, coins);
+					return tradeManager.SellMore(_trade, coins);
 			}
 			return false;
 		}
@@ -166,7 +167,8 @@ namespace DayTradeScanner.Bot.Implementation
 		/// </summary>
 		/// <param name="candles">candle history</param>
 		/// <param name="bar">currentcandle</param>
-		private void ScanForEntry(List<MarketCandle> candles, int bar)
+        /// <param name="tradeManager">tradeManager</param>
+		private void ScanForEntry(List<MarketCandle> candles, int bar, ITradeManager tradeManager)
 		{
 			TradeType tradeType;
 			if (IsValidEntry(candles, bar, out tradeType))
@@ -176,16 +178,16 @@ namespace DayTradeScanner.Bot.Implementation
 				if (MaxTimesRebuy >= 1) totalRebuy += FirstRebuyFactor;
 				if (MaxTimesRebuy >= 2) totalRebuy += SecondRebuyFactor;
 				if (MaxTimesRebuy >= 3) totalRebuy += ThirdRebuyFactor;
-				_bundleSize = _tradeManager.AccountBalance / totalRebuy;
+				_bundleSize = tradeManager.AccountBalance / totalRebuy;
 				var coins = _bundleSize / candle.ClosePrice;
 				switch (tradeType)
 				{
 					case TradeType.Long:
-						_trade = _tradeManager.BuyMarket(_symbol, coins);
+						_trade = tradeManager.BuyMarket(Symbol, coins);
 						break;
 
 					case TradeType.Short:
-						_trade = _tradeManager.SellMarket(_symbol, coins);
+						_trade = tradeManager.SellMarket(Symbol, coins);
 						break;
 
 				}
@@ -234,7 +236,8 @@ namespace DayTradeScanner.Bot.Implementation
 		/// </summary>
 		/// <param name="candles">candle history</param>
 		/// <param name="bar">currentcandle</param>
-		private void CloseTradeIfPossible(List<MarketCandle> candles, int bar)
+		/// <param name="tradeManager">tradeManager</param>
+		private void CloseTradeIfPossible(List<MarketCandle> candles, int bar,ITradeManager tradeManager)
 		{
 			var candle = candles[bar];
 			var bbands = new BollingerBands(candles, bar);
@@ -242,7 +245,7 @@ namespace DayTradeScanner.Bot.Implementation
 			// for long we close the trade if price  gets above the upper bollinger bands
 			if (_trade.TradeType == TradeType.Long && candle.HighPrice > bbands.Upper)
 			{
-				if (_tradeManager.Close(_trade, candle.HighPrice))
+				if (tradeManager.Close(_trade, candle.HighPrice))
 				{
 					_state = StrategyState.Scanning;
 					_trade = null;
@@ -253,7 +256,7 @@ namespace DayTradeScanner.Bot.Implementation
 			// for short we close the trade if price  gets below the lowe bollinger bands
 			if (_trade.TradeType == TradeType.Short && candle.LowPrice < bbands.Lower)
 			{
-				if (_tradeManager.Close(_trade, candle.LowPrice))
+				if (tradeManager.Close(_trade, candle.LowPrice))
 				{
 					_state = StrategyState.Scanning;
 					_trade = null;

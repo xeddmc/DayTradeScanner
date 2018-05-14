@@ -14,18 +14,21 @@ namespace DayTradeScanner
 	{
 		static void Main(string[] args)
 		{
-			// Uncomment next 2 lines for backtesting
-			// var tester = new BackTester();
-			// tester.Test(new ExchangeBitfinexAPI(), "NEOUSD");
-
+			// Uncomment next  lines for backtesting
+            /*
+            var virtualTradeManager = new VirtualTradeManager();
+			var strategy = new DayTradingStrategy("NEOUSD");
+			var tester = new BackTester();
+			tester.Test(new ExchangeBitfinexAPI(),  strategy);
+            */
             
 			var scanner = new Scanner();
 			Task.Run(async () =>
 			{
-				await scanner.FindCoinsWithEnoughVolume();
+				await scanner.FindCoinsWithEnoughVolumeAsync();
 				while (true)
 				{
-					await scanner.Scan();
+					await scanner.ScanAsync();
                     await Task.Delay(5000);
 				}
 			}).Wait();

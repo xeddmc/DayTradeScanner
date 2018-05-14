@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DayTradeScanner.Backtest;
+using DayTradeScanner.Bot;
 using DayTradeScanner.Bot.Implementation;
 using ExchangeSharp;
 using MessagePack;
@@ -52,16 +53,16 @@ namespace DayTradeScanner
 		/// Backtest strategy for the specified symbol.
 		/// </summary>
 		/// <param name="api">exchange api</param>
-		/// <param name="symbol">Symbol.</param>
-		public void Test(ExchangeAPI api, string symbol)
+		/// <param name="strategy">strategy to test</param>
+		public void Test(ExchangeAPI api, IStrategy strategy)
 		{
 			// Get candle sticks
-			var allCandles = _cache.Load(symbol);
+			var allCandles = _cache.Load(strategy.Symbol);
 			if (allCandles == null)
 			{
-				allCandles = DownloadCandlesFromExchange(api, symbol, new DateTime(2018, 1, 1, 0, 0, 0), DateTime.Now);
+				allCandles = DownloadCandlesFromExchange(api, strategy.Symbol, new DateTime(2018, 1, 1, 0, 0, 0), DateTime.Now);
 
-				_cache.Save(symbol, allCandles);
+				_cache.Save(strategy.Symbol, allCandles);
 			}
 
             // convert from utc->local date/teim
@@ -70,11 +71,10 @@ namespace DayTradeScanner
 
 			// backtest strategy
 			var virtualTradeManager = new VirtualTradeManager();
-			var strategy = new DayTradingStrategy(symbol, virtualTradeManager);
 			for (int i = allCandles.Count - 50; i > 0; i--)
 			{
 				virtualTradeManager.Candle = allCandles[i];
-				strategy.OnCandle(allCandles, i);
+				strategy.OnCandle(allCandles, i, virtualTradeManager);
 			}
             
 
@@ -87,7 +87,7 @@ namespace DayTradeScanner
 			// show results
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");
-			Console.WriteLine($"Symbol                : {symbol} on {api.Name}");
+			Console.WriteLine($"Symbol                : {strategy.Symbol} on {api.Name}");
 			Console.WriteLine($"Period                : {allCandles[allCandles.Count - 1].Timestamp:dd-MM-yyyy HH:mm} / {allCandles[0].Timestamp:dd-MM-yyyy HH:mm}");
 
 			Console.WriteLine($"Starting capital      : $ 1000");

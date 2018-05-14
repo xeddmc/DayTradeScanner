@@ -58,8 +58,11 @@ namespace DayTradeScanner
 		}
 
 
-
-		public async Task FindCoinsWithEnoughVolume()
+        /// <summary>
+        /// Downloads all symbols from the exchanges and filters out the coins with enough 24hr Volume
+        /// </summary>
+        /// <returns></returns>
+		public async Task FindCoinsWithEnoughVolumeAsync()
 		{
 			_symbols = new List<string>();
 			Console.WriteLine("Daytrader scanner 1.0");
@@ -73,20 +76,25 @@ namespace DayTradeScanner
 
 			Console.WriteLine($"Filtering symbols with {_currency} and 24hr volume > {_volume}");
 
+            // for each symbol
 			foreach (var symbol in allSymbols)
 			{
 				if (!symbol.ToLowerInvariant().Contains(_currency.ToLowerInvariant()))
 				{
-					// only scan valid pairs
+					// ignore, symbol has wrong currency
 					continue;
 				}
 
+                // check volume
 				var ticker = allTickers.FirstOrDefault(e => e.Key == symbol).Value;
 				if (ticker.Volume.ConvertedVolume < _volume)
 				{
+					// ignore since volume is to low
 					Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} skipped");
 					continue;
 				}
+
+                // add to list
 				Console.WriteLine($"{symbol} 24hr volume:{Math.Floor(ticker.Volume.ConvertedVolume)} added!");
 				_symbols.Add(symbol);
 			}
@@ -94,23 +102,32 @@ namespace DayTradeScanner
 			Console.WriteLine($"List constructed.. Now starting scanning of 5 min charts for {_symbols.Count} symbols...");
 		}
 
-		public async Task Scan()
+        /// <summary>
+        /// Performs a scan for all filtered symbols
+        /// </summary>
+        /// <returns></returns>
+		public async Task ScanAsync()
 		{
-			var bgColor = Console.BackgroundColor;
-			var fgColor = Console.ForegroundColor;
-    
+			// for each symbol
 			foreach (var symbol in _symbols)
 			{
 				try
 				{
+                    // download the new candles
 					Console.WriteLine($"Scanning {symbol}...");
-					var strategy = new DayTradingStrategy(symbol, new VirtualTradeManager());
 					var candles = (await _api.GetCandlesAsync(symbol, 60 * 5, DateTime.Now.AddMinutes(-5 * 50))).Reverse().ToList();
 
+
+                    // scan candles for buy/sell signal
 					TradeType tradeType;
+                    var strategy = new DayTradingStrategy(symbol);
 					if (strategy.IsValidEntry(candles, 0, out tradeType))
 					{
+						// got buy/sell signal.. write to console
 						Console.Beep();
+						var bgColor = Console.BackgroundColor;
+						var fgColor = Console.ForegroundColor;
+
 						Console.BackgroundColor = ConsoleColor.Red;
 						Console.ForegroundColor = ConsoleColor.White;
 						Console.WriteLine($"{symbol} {tradeType} signal found");

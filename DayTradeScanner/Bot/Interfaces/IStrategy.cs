@@ -11,7 +11,8 @@ namespace DayTradeScanner.Bot
 		/// </summary>
 		/// <param name="candles">history of candles</param>
 		/// <param name="candle">current candle</param>
-		void OnCandle(List<MarketCandle> candles, int candle);
+		/// <param name="tradeManager">tradeManager</param>
+		void OnCandle(List<MarketCandle> candles, int candle, ITradeManager tradeManager);
 
 		/// <summary>
 		/// Checks if a valid entry appeard
@@ -21,5 +22,11 @@ namespace DayTradeScanner.Bot
 		/// <param name="candle">The current candle</param>
 		/// <param name="tradeType">returns trade type.</param>
 		bool IsValidEntry(List<MarketCandle> candles, int candle, out TradeType tradeType);
+
+        /// <summary>
+        /// Symbol to test
+        /// </summary>
+        /// <value>The symbol.</value>
+		string Symbol { get; }
 	}
 }
