@@ -15,12 +15,12 @@ namespace DayTradeScanner.Bot.Implementation
 			Rebuy2,
 			Waiting
 		}
-		private const decimal RebuyPercentage = 0.9825m; //1.75%
-		private const decimal FirstRebuyFactor = 2m;  // 2x
-		private const decimal SecondRebuyFactor = 4m;   // 4x 
-		private const decimal ThirdRebuyFactor = 8m;  // 8x 
+		private const decimal RebuyPercentage = 0.9825m; // 1.75%
+		private const decimal FirstRebuyFactor = 2m;     // 2x
+		private const decimal SecondRebuyFactor = 4m;    // 4x 
+		private const decimal ThirdRebuyFactor = 8m;     // 8x 
 		private const int MaxTimesRebuy = 2;
-		private const bool AllowShorting = false;
+		private const bool AllowShorting = true;
 
 		private readonly string _symbol;
 		private readonly ITradeManager _tradeManager;
@@ -213,10 +213,8 @@ namespace DayTradeScanner.Bot.Implementation
 			if (_trade.TradeType == TradeType.Long && candle.ClosePrice < bbands.Lower && stoch.K < 20 && stoch.D < 20)
 			{
 				var price = _trade.OpenPrice * RebuyPercentage;
-				if (_trade.Rebuys.Count >= 1) price = price * RebuyPercentage;
-				if (_trade.Rebuys.Count >= 2) price = price * RebuyPercentage;
-				if (_trade.Rebuys.Count >= 3) price = price * RebuyPercentage;
-				return candle.ClosePrice <= price;
+				if (_trade.Rebuys.Count > 0 ) price = _trade.Rebuys.Last().Price * RebuyPercentage;
+				return candle.ClosePrice < price;
 			}
 
 			// for short we do a rebuy when price closes above the upper bollinger bands and both stochastics are above 80
@@ -225,10 +223,8 @@ namespace DayTradeScanner.Bot.Implementation
 			{
 				var factor = 1m + (1m - RebuyPercentage);
 				var price = _trade.OpenPrice * factor;
-				if (_trade.Rebuys.Count >= 1) price = price * factor;
-				if (_trade.Rebuys.Count >= 2) price = price * factor;
-				if (_trade.Rebuys.Count >= 3) price = price * factor;
-				return candle.ClosePrice >= price;
+				if (_trade.Rebuys.Count > 0) price = _trade.Rebuys.Last().Price * factor;
+				return candle.ClosePrice > price;
 			}
 			return false;
 		}

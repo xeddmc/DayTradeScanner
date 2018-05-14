@@ -55,7 +55,7 @@ namespace DayTradeScanner
 		/// <param name="symbol">Symbol.</param>
 		public void Test(ExchangeAPI api, string symbol)
 		{
-			// Get all candle sticks
+			// Get candle sticks
 			var allCandles = _cache.Load(symbol);
 			if (allCandles == null)
 			{
@@ -63,10 +63,12 @@ namespace DayTradeScanner
 
 				_cache.Save(symbol, allCandles);
 			}
+
+            // convert from utc->local date/teim
 			foreach (var candle in allCandles) candle.Timestamp = candle.Timestamp.AddHours(2);
 
 
-			// backtest
+			// backtest strategy
 			var virtualTradeManager = new VirtualTradeManager();
 			var strategy = new DayTradingStrategy(symbol, virtualTradeManager);
 			for (int i = allCandles.Count - 50; i > 0; i--)
@@ -76,10 +78,12 @@ namespace DayTradeScanner
 			}
             
 
+            // dump all trades to console
 			foreach (var trade in virtualTradeManager.Trades)
 			{
 				((VirtualTrade)trade).Dump();
 			}
+
 			// show results
 			Console.WriteLine("");
 			Console.WriteLine("Backtesting results");

@@ -7,7 +7,7 @@ namespace DayTradeScanner.Backtest
 {
 	public class VirtualTradeManager : ITradeManager
 	{
-		private const decimal FeesPercentage = 0.2m; // 0.2% fees
+		private const decimal FeesPercentage = 0.2m;// 0.1m;  // 0.2% fees
 
 		public VirtualTradeManager(decimal initalAccountBalance = 1000)
 		{
@@ -177,6 +177,8 @@ namespace DayTradeScanner.Backtest
 			double reBuys4 = 0;
 			double maxProfit = 0;
 			double maxLoss = 0;
+			double shorts = 0;
+			double longs = 0;
 			var shortestTrade = TimeSpan.MaxValue;
 			var longestTrade = TimeSpan.MinValue;
 
@@ -206,7 +208,13 @@ namespace DayTradeScanner.Backtest
 				else if (trade.Rebuys.Count == 2) reBuys2++;
 				else if (trade.Rebuys.Count == 3) reBuys3++;
 				else if (trade.Rebuys.Count == 4) reBuys4++;
+
+				if (trade.TradeType == TradeType.Long) longs++;
+				else shorts++;
 			}
+
+			longs  = 100.0 * (longs / Trades.Count);
+			shorts = 100.0 * (shorts / Trades.Count);
 
 			reBuys0 = 100.0 * (reBuys0 / Trades.Count);
 			reBuys1 = 100.0 * (reBuys1 / Trades.Count);
@@ -231,6 +239,9 @@ namespace DayTradeScanner.Backtest
 			Console.WriteLine($"Trades with 2 rebuys  : {reBuys2:0.00} %");
 			Console.WriteLine($"Trades with 3 rebuys  : {reBuys3:0.00} %");
 			Console.WriteLine($"Trades with 4 rebuys  : {reBuys4:0.00} %");
+
+            Console.WriteLine($"Trades long           : {longs:0.00} %");
+            Console.WriteLine($"Trades shorts         : {shorts:0.00} %");
 
 			Console.WriteLine($"Average profit/trade  : {averageProfit:0.00} %");
 			Console.WriteLine($"Max profit            : {maxProfit:0.00} %");
