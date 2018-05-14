@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using DayTradeScanner.Backtest;
 using DayTradeScanner.Bot.Implementation;
 using ExchangeSharp;
-using Microsoft.Extensions.Configuration;
-
 namespace DayTradeScanner
 {
 	class Program
@@ -20,7 +18,6 @@ namespace DayTradeScanner
 			var strategy = new DayTradingStrategy("NEOUSD");
 			var tester = new BackTester();
 			tester.Test(new ExchangeBitfinexAPI(),  strategy);
-            */
             
 			var scanner = new Scanner();
 			Task.Run(async () =>
@@ -32,6 +29,7 @@ namespace DayTradeScanner
                     await Task.Delay(5000);
 				}
 			}).Wait();
+            */
 		}
 	}
 }
