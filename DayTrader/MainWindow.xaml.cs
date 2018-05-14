@@ -71,11 +71,6 @@ namespace DayTrader
 			_scanner = new Scanner(exchange, currency, volume);
 			while (_running)
 			{
-				await Dispatcher.UIThread.InvokeAsync(() =>
-				{
-					Signals.Clear();
-				});
-
 				int idx = 0;
 				foreach (var symbol in _scanner.Symbols)
 				{
@@ -86,8 +81,8 @@ namespace DayTrader
 					{
 						await Dispatcher.UIThread.InvokeAsync(() =>
 						{
-							Signals.Add(signal);
-                        });
+							Signals.Insert(0, signal);
+						});
 					}
 				}
 				SetStatusText($"sleeping...");

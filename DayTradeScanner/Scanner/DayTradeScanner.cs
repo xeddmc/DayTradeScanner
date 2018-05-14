@@ -120,7 +120,7 @@ namespace DayTradeScanner
 					{
 						Symbol = symbol,
 						Trade = tradeType.ToString(),
-						Date = candles[0].Timestamp
+						Date = candles[0].Timestamp.AddHours(2)
 					};
 				}
 			}
