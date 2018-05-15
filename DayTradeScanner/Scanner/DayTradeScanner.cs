@@ -130,7 +130,8 @@ namespace DayTradeScanner
                     // ignore signals for shorts when not allowed
                     if (tradeType == TradeType.Short && !_settings.AllowShorts) return null;
 
-                    // got buy/sell signal.. write to console
+					// got buy/sell signal.. write to console
+					Console.Beep();
                     return new Signal()
                     {
                         Symbol = symbol,

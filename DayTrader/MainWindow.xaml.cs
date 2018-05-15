@@ -29,7 +29,7 @@ namespace DayTrader
         private void InitializeComponent()
         {
             AvaloniaXamlLoaderPortableXaml.Load(this);
-            this.AttachDevTools();
+           // this.AttachDevTools();
             _btnStart = this.Find<Button>("btnStart");
             _btnStart.Click += btnStart_Click;
 
@@ -54,7 +54,7 @@ namespace DayTrader
         private void menuItemSettings_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)
         {
             var dlg = new SettingsDialog();
-            dlg.ShowDialog();
+            dlg.Show();
         }
 
         private void btnStart_Click(object sender, Avalonia.Interactivity.RoutedEventArgs e)

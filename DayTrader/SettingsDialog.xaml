@@ -19,6 +19,8 @@
 
         <TextBlock Text="Short signals" Grid.Row="3" Grid.Column="0" Margin="0,0,10,10"  VerticalAlignment="Center" />
         <CheckBox Name="cbShorts" IsChecked="{Binding AllowShorts, Mode=TwoWay}"  Grid.Row="3" Grid.Column="1"></CheckBox>
+
+        
         <Button Name="btnSave" Width="100" HorizontalAlignment="Right" VerticalAlignment="Center"  Grid.Row="4" Grid.Column="1">Save</Button>
     </Grid>
 </Window>

@@ -21,13 +21,13 @@ namespace DayTrader
 				.UsePlatformDetect()
 				.Start<MainWindow>();
 		}
-      
+      /*
 		public static void AttachDevTools(Window window)
 		{
 #if DEBUG
 			DevTools.Attach(window);
 #endif
-		}
+		}*/
 
 	}
 }
