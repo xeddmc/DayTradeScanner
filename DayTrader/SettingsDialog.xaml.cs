@@ -40,6 +40,8 @@ namespace DayTrader
             CurrencyEUR = settings.EUR;
             CurrencyBNB = settings.BNB;
             CurrencyBTC = settings.BTC;
+            AllowShorts = settings.AllowShorts;
+
             Volume = settings.Min24HrVolume.ToString();
             _dropDown.SelectedIndex = Exchanges.IndexOf(settings.Exchange);
         }
@@ -52,6 +54,7 @@ namespace DayTrader
             settings.EUR = CurrencyEUR;
             settings.BNB = CurrencyBNB;
             settings.BTC = CurrencyBTC;
+            settings.AllowShorts = AllowShorts;
 
             long volume;
             if (long.TryParse(Volume, out volume))
@@ -101,6 +104,14 @@ namespace DayTrader
         {
             get { return this.GetValue(CurrencyBTCProperty); }
             set { this.SetValue(CurrencyBTCProperty, value); }
+        }
+
+        public static readonly AvaloniaProperty<bool> AllowShortsProperty = AvaloniaProperty.Register<SettingsDialog, bool>("AllowShorts", inherits: true);
+
+        public bool AllowShorts
+        {
+            get { return this.GetValue(AllowShortsProperty); }
+            set { this.SetValue(AllowShortsProperty, value); }
         }
 
         public static readonly AvaloniaProperty<string> VolumeProperty = AvaloniaProperty.Register<SettingsDialog, string>("Volume", inherits: true);

@@ -127,12 +127,15 @@ namespace DayTradeScanner
                 var strategy = new DayTradingStrategy(symbol);
                 if (strategy.IsValidEntry(candles, 0, out tradeType))
                 {
+                    // ignore signals for shorts when not allowed
+                    if (tradeType == TradeType.Short && !_settings.AllowShorts) return null;
+
                     // got buy/sell signal.. write to console
                     return new Signal()
                     {
                         Symbol = symbol,
                         Trade = tradeType.ToString(),
-                        Date = candles[0].Timestamp.AddHours(2)
+                        Date = $"{candles[0].Timestamp.AddHours(2):dd-MM-yyyy HH:mm}"
                     };
                 }
             }

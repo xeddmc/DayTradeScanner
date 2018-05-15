@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window xmlns="https://github.com/avaloniaui" Title="Daytrader" MinWidth="640" MinHeight="480" Width="640" Height="480">
+<Window xmlns="https://github.com/avaloniaui" Title="Daytrade scanner v1.1 (c) 2018 Erwin Beckers"  Width="640" Height="480">
     <Grid ColumnDefinitions="*" RowDefinitions="Auto,Auto,*,Auto">
         <StackPanel Orientation="Horizontal" Gap="16" Background="#cccccc">
             <Menu Margin="5,5,5,5">
@@ -17,7 +17,7 @@
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal" Gap="16">
-                        <TextBlock Text="{Binding Date}" Width="200" />
+                        <TextBlock Text="{Binding Date}" Width="100" />
                         <TextBlock Text="{Binding Symbol}" Width="100" />
                         <TextBlock Text="{Binding Trade}" Width="100" />
                     </StackPanel>

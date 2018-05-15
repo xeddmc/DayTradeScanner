@@ -26,11 +26,15 @@ namespace DayTradeScanner
         [Key(6)]
         public long Min24HrVolume { get; set; }
 
+        [Key(7)]
+        public bool AllowShorts { get; set; }
+
         public Settings()
         {
             Exchange = "Bitfinex";
             USD = true;
             Min24HrVolume = 400000;
+            AllowShorts = true;
         }
     }
 }

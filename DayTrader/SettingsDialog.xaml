@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window xmlns="https://github.com/avaloniaui" Title="Settings" Width="400" Height="160">
-    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="10,10,10,10">
+<Window xmlns="https://github.com/avaloniaui" Title="Settings" Width="400" Height="200">
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" Margin="10,10,10,10">
         <TextBlock Text="Exchange" Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" />
         <DropDown Name="dropExchange" Grid.Row="0" Grid.Column="1"  Margin="0,0,0,10" Width="150" SelectedIndex="0" HorizontalAlignment="Left"  VerticalAlignment="Center" Items="{Binding Exchanges}" />
 
@@ -16,6 +16,9 @@
         <TextBlock Text="Min 24hr Volume" Grid.Row="2" Grid.Column="0" Margin="0,0,10,10"  VerticalAlignment="Center" />
         <TextBox Name="tbVolume"  Grid.Row="2" Grid.Column="1" Text="{Binding Volume, Mode=TwoWay}" Width="150"  HorizontalAlignment="Left"  VerticalAlignment="Center" />
 
-        <Button Name="btnSave" Width="100" HorizontalAlignment="Right" VerticalAlignment="Center"  Grid.Row="3" Grid.Column="1">Save</Button>
+
+        <TextBlock Text="Short signals" Grid.Row="3" Grid.Column="0" Margin="0,0,10,10"  VerticalAlignment="Center" />
+        <CheckBox Name="cbShorts" IsChecked="{Binding AllowShorts, Mode=TwoWay}"  Grid.Row="3" Grid.Column="1"></CheckBox>
+        <Button Name="btnSave" Width="100" HorizontalAlignment="Right" VerticalAlignment="Center"  Grid.Row="4" Grid.Column="1">Save</Button>
     </Grid>
 </Window>
