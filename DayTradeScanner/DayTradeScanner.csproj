@@ -23,6 +23,5 @@
     <Folder Include="Indicators\" />
     <Folder Include="Bot\Interfaces\" />
     <Folder Include="Bot\Implementation\" />
-    <Folder Include="Scanner\" />
   </ItemGroup>
 </Project>

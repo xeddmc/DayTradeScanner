@@ -1,18 +1,21 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
-<Window xmlns="https://github.com/avaloniaui" Title="Settings" MinWidth="640" MinHeight="480" Width="640" Height="480">
-    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto">
-        <TextBlock Text="Exchange" Grid.Row="0" Grid.Column="0" />
-        <TextBlock Text="Currency" Grid.Row="1" Grid.Column="0" />
-        <TextBlock Text="Min 24hr Volume" Grid.Row="2" Grid.Column="0" />
-        <DropDown Grid.Row="0" Grid.Column="1">
-        </DropDown>
-        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Gap="10">
-            <CheckBox>USD</CheckBox>
-            <CheckBox>EUR</CheckBox>
-            <CheckBox>BTC</CheckBox>
-            <CheckBox>ETH</CheckBox>
-            <CheckBox>BNB</CheckBox>
+<Window xmlns="https://github.com/avaloniaui" Title="Settings" Width="400" Height="160">
+    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" Margin="10,10,10,10">
+        <TextBlock Text="Exchange" Grid.Row="0" Grid.Column="0" Margin="0,0,10,10" VerticalAlignment="Center" />
+        <DropDown Name="dropExchange" Grid.Row="0" Grid.Column="1"  Margin="0,0,0,10" Width="150" SelectedIndex="0" HorizontalAlignment="Left"  VerticalAlignment="Center" Items="{Binding Exchanges}" />
+
+        <TextBlock Text="Currency" Grid.Row="1" Grid.Column="0" Margin="0,0,10,10"  VerticalAlignment="Center" />
+        <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Gap="10"  Margin="0,0,0,10"  HorizontalAlignment="Left"  VerticalAlignment="Center" >
+            <CheckBox Name="cbUSD" IsChecked="{Binding CurrencyUSD, Mode=TwoWay}">USD</CheckBox>
+            <CheckBox Name="cbEUR" IsChecked="{Binding CurrencyEUR, Mode=TwoWay}">EUR</CheckBox>
+            <CheckBox Name="cbBTC" IsChecked="{Binding CurrencyBTC, Mode=TwoWay}">BTC</CheckBox>
+            <CheckBox Name="cbETH" IsChecked="{Binding CurrencyETH, Mode=TwoWay}">ETH</CheckBox>
+            <CheckBox Name="cbBNB" IsChecked="{Binding CurrencyBNB, Mode=TwoWay}">BNB</CheckBox>
         </StackPanel>
-        <TextBox Grid.Row="2" Grid.Column="1">100</TextBox>
+
+        <TextBlock Text="Min 24hr Volume" Grid.Row="2" Grid.Column="0" Margin="0,0,10,10"  VerticalAlignment="Center" />
+        <TextBox Name="tbVolume"  Grid.Row="2" Grid.Column="1" Text="{Binding Volume, Mode=TwoWay}" Width="150"  HorizontalAlignment="Left"  VerticalAlignment="Center" />
+
+        <Button Name="btnSave" Width="100" HorizontalAlignment="Right" VerticalAlignment="Center"  Grid.Row="3" Grid.Column="1">Save</Button>
     </Grid>
 </Window>
