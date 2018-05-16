@@ -1,11 +1,14 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayTradeScanner", "DayTradeScanner\DayTradeScanner.csproj", "{87B3D4AA-4D70-4E1A-BE37-F497B961FF2A}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DayTradeScanner", "DayTradeScanner\DayTradeScanner.csproj", "{87B3D4AA-4D70-4E1A-BE37-F497B961FF2A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayTrader", "DayTrader\DayTrader.csproj", "{034BFD0E-5236-4E89-A93F-AF73EB66952D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DayTrader", "DayTrader\DayTrader.csproj", "{034BFD0E-5236-4E89-A93F-AF73EB66952D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DayTrader.Console.App", "DayTrader.Console.App\DayTrader.Console.App.csproj", "{DF74C5D3-D283-4EF3-9731-A07FF196A6CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DayTrader.Console.App", "DayTrader.Console.App\DayTrader.Console.App.csproj", "{DF74C5D3-D283-4EF3-9731-A07FF196A6CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backtester.Console.App", "Backtester.Console.App\Backtester.Console.App.csproj", "{139707FD-4DDB-48CA-805F-7C1594F7CE57}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,5 +28,15 @@ Global
 		{DF74C5D3-D283-4EF3-9731-A07FF196A6CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF74C5D3-D283-4EF3-9731-A07FF196A6CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF74C5D3-D283-4EF3-9731-A07FF196A6CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{139707FD-4DDB-48CA-805F-7C1594F7CE57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{139707FD-4DDB-48CA-805F-7C1594F7CE57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{139707FD-4DDB-48CA-805F-7C1594F7CE57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{139707FD-4DDB-48CA-805F-7C1594F7CE57}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {99E54514-084E-4456-A29A-DD868326FD56}
 	EndGlobalSection
 EndGlobal
